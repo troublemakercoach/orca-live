@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORCA Live — Daily Debrief Tool</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;700&display=swap');
+
+:root {
+–black: #0a0a0a;
+–yellow: #CC4A1A;
+–orange: #a33a12;
+–white: #F5F0E8;
+–grey: #1a1a1a;
+–mid: #2a2a2a;
+–text-dim: #888;
+–red: #ff3333;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–black);
+color: var(–white);
+font-family: ‘IBM Plex Sans’, sans-serif;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+.header {
+background: var(–yellow);
+padding: 20px 24px 16px;
+position: relative;
+overflow: hidden;
+}
+
+.header::after {
+content: ‘ORCA’;
+position: absolute;
+right: -10px;
+top: -20px;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 120px;
+color: rgba(0,0,0,0.08);
+line-height: 1;
+pointer-events: none;
+}
+
+.header-tag {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+font-weight: 600;
+color: var(–black);
+letter-spacing: 3px;
+text-transform: uppercase;
+margin-bottom: 6px;
+}
+
+.header h1 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 52px;
+color: var(–black);
+line-height: 0.9;
+letter-spacing: 2px;
+}
+
+.header-sub {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+color: rgba(0,0,0,0.6);
+margin-top: 8px;
+}
+
+.timer-bar {
+background: var(–black);
+border-bottom: 1px solid var(–mid);
+padding: 12px 24px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.timer-display {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 36px;
+color: var(–yellow);
+letter-spacing: 2px;
+transition: color 0.3s;
+}
+
+.timer-label {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+letter-spacing: 2px;
+}
+
+.timer-btn {
+background: var(–yellow);
+color: var(–black);
+border: none;
+padding: 8px 20px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 2px;
+cursor: pointer;
+text-transform: uppercase;
+transition: background 0.15s;
+}
+
+.timer-btn:hover { background: var(–orange); color: white; }
+.timer-btn.running { background: var(–orange); color: white; }
+
+.progress-rail {
+display: flex;
+border-bottom: 2px solid var(–mid);
+}
+
+.step-tab {
+flex: 1;
+padding: 10px 8px;
+text-align: center;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 18px;
+letter-spacing: 1px;
+color: var(–text-dim);
+border-right: 1px solid var(–mid);
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+}
+
+.step-tab:last-child { border-right: none; }
+.step-tab.active { color: var(–yellow); background: rgba(255,209,0,0.06); }
+.step-tab.complete { color: var(–orange); }
+.step-tab.active::after {
+content: ‘’;
+position: absolute;
+bottom: -2px; left: 0; right: 0;
+height: 2px;
+background: var(–yellow);
+}
+
+.main {
+padding: 24px;
+max-width: 680px;
+margin: 0 auto;
+}
+
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+.step-header { margin-bottom: 20px; }
+
+.step-letter {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 80px;
+line-height: 0.85;
+color: var(–yellow);
+display: inline-block;
+}
+
+.step-name {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 28px;
+color: var(–white);
+letter-spacing: 3px;
+display: block;
+margin-top: 4px;
+}
+
+.step-rule {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+color: var(–text-dim);
+margin-top: 8px;
+line-height: 1.6;
+border-left: 2px solid var(–mid);
+padding-left: 12px;
+}
+
+.question {
+background: var(–grey);
+border-left: 3px solid var(–yellow);
+padding: 16px 18px;
+margin: 20px 0 8px;
+font-size: 16px;
+font-weight: 500;
+line-height: 1.4;
+}
+
+/* VOICE INPUT WRAPPER */
+.voice-wrap {
+position: relative;
+margin-bottom: 12px;
+}
+
+.voice-wrap textarea,
+.voice-wrap input {
+width: 100%;
+padding-right: 52px;
+}
+
+textarea {
+width: 100%;
+background: var(–mid);
+border: 1px solid #333;
+border-top: 2px solid var(–yellow);
+color: var(–white);
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-size: 15px;
+padding: 14px 16px;
+resize: vertical;
+min-height: 90px;
+outline: none;
+transition: border-color 0.2s;
+line-height: 1.5;
+}
+
+textarea:focus { border-color: var(–yellow); background: #2f2f2f; }
+textarea::placeholder { color: #555; }
+
+.mic-btn {
+position: absolute;
+right: 8px;
+top: 8px;
+width: 36px;
+height: 36px;
+background: var(–grey);
+border: 1px solid #444;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 16px;
+transition: all 0.2s;
+z-index: 2;
+color: var(–text-dim);
+}
+
+.mic-btn:hover { border-color: var(–yellow); color: var(–yellow); }
+.mic-btn.listening {
+background: var(–red);
+border-color: var(–red);
+color: white;
+animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,51,51,0.4); }
+50% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255,51,51,0); }
+}
+
+.voice-status {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–red);
+letter-spacing: 1px;
+margin-top: 4px;
+min-height: 16px;
+display: none;
+}
+
+.voice-status.active { display: block; }
+
+/* No mic support */
+.no-mic-note {
+background: rgba(255,107,0,0.1);
+border: 1px solid var(–orange);
+padding: 10px 14px;
+margin-bottom: 16px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–orange);
+display: none;
+}
+
+.cause-cats { margin: 16px 0; }
+
+.cause-cat-title {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–text-dim);
+letter-spacing: 2px;
+margin-bottom: 8px;
+}
+
+.cause-tags {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+margin-bottom: 16px;
+}
+
+.cause-tag {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+padding: 5px 10px;
+border: 1px solid #333;
+color: var(–text-dim);
+cursor: pointer;
+transition: all 0.15s;
+}
+
+.cause-tag:hover { border-color: var(–yellow); color: var(–yellow); }
+.cause-tag.selected { border-color: var(–yellow); color: var(–black); background: var(–yellow); }
+
+.action-block {
+margin: 16px 0;
+background: var(–grey);
+border: 1px solid var(–mid);
+padding: 16px;
+}
+
+.action-block-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 16px;
+letter-spacing: 2px;
+color: var(–orange);
+margin-bottom: 12px;
+}
+
+.action-label {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 10px;
+color: var(–text-dim);
+letter-spacing: 1px;
+margin-bottom: 4px;
+margin-top: 10px;
+}
+
+.action-input-wrap {
+position: relative;
+}
+
+.action-input-wrap input {
+width: 100%;
+background: var(–mid);
+border: 1px solid #333;
+border-top: 2px solid var(–orange);
+color: var(–white);
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 13px;
+padding: 10px 48px 10px 12px;
+outline: none;
+}
+
+.action-input-wrap input:focus { border-color: var(–orange); }
+.action-input-wrap input::placeholder { color: #555; font-size: 11px; }
+
+.action-input-wrap .mic-btn {
+top: 50%;
+transform: translateY(-50%);
+right: 6px;
+width: 30px;
+height: 30px;
+font-size: 14px;
+}
+
+.btn-row {
+display: flex;
+gap: 10px;
+margin-top: 20px;
+}
+
+.btn-primary {
+background: var(–yellow);
+color: var(–black);
+border: none;
+padding: 14px 28px;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 20px;
+letter-spacing: 2px;
+cursor: pointer;
+flex: 1;
+transition: background 0.15s;
+}
+
+.btn-primary:hover { background: var(–orange); color: white; }
+
+.btn-secondary {
+background: transparent;
+color: var(–text-dim);
+border: 1px solid var(–mid);
+padding: 14px 20px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+letter-spacing: 1px;
+cursor: pointer;
+transition: all 0.15s;
+}
+
+.btn-secondary:hover { border-color: var(–white); color: var(–white); }
+
+.summary-block {
+background: var(–grey);
+border: 1px solid var(–mid);
+padding: 20px;
+margin-bottom: 16px;
+}
+
+.summary-label {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 22px;
+letter-spacing: 2px;
+color: var(–yellow);
+border-bottom: 1px solid var(–mid);
+padding-bottom: 8px;
+margin-bottom: 12px;
+}
+
+.summary-text {
+font-size: 14px;
+line-height: 1.6;
+color: var(–white);
+white-space: pre-wrap;
+}
+
+.summary-action-row {
+display: grid;
+grid-template-columns: 1fr 2fr 1fr;
+gap: 8px;
+margin-bottom: 8px;
+padding: 10px;
+background: var(–mid);
+}
+
+.summary-action-cell {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+}
+
+.summary-action-cell span {
+display: block;
+font-size: 10px;
+color: var(–text-dim);
+letter-spacing: 1px;
+margin-bottom: 3px;
+}
+
+.complete-banner {
+background: var(–yellow);
+color: var(–black);
+padding: 20px 24px;
+margin-bottom: 20px;
+text-align: center;
+}
+
+.complete-banner h2 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 36px;
+letter-spacing: 3px;
+}
+
+.complete-banner p {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+margin-top: 4px;
+}
+
+.copy-btn {
+background: var(–orange);
+color: white;
+border: none;
+padding: 12px 24px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 2px;
+cursor: pointer;
+width: 100%;
+margin-top: 12px;
+transition: opacity 0.15s;
+}
+
+.copy-btn:hover { opacity: 0.85; }
+
+.reset-btn {
+background: transparent;
+color: var(–text-dim);
+border: 1px solid var(–mid);
+padding: 12px 24px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+letter-spacing: 2px;
+cursor: pointer;
+width: 100%;
+margin-top: 8px;
+transition: all 0.15s;
+}
+
+.reset-btn:hover { border-color: var(–white); color: var(–white); }
+
+.why-chain { margin: 12px 0; }
+
+.why-item {
+display: flex;
+gap: 10px;
+align-items: flex-start;
+margin-bottom: 8px;
+}
+
+.why-badge {
+background: var(–orange);
+color: white;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 14px;
+padding: 4px 8px;
+letter-spacing: 1px;
+white-space: nowrap;
+margin-top: 2px;
+flex-shrink: 0;
+}
+
+.why-input-wrap {
+flex: 1;
+position: relative;
+}
+
+.why-input-wrap input {
+width: 100%;
+background: var(–mid);
+border: 1px solid #333;
+color: var(–white);
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-size: 14px;
+padding: 10px 48px 10px 12px;
+outline: none;
+min-height: 44px;
+}
+
+.why-input-wrap input:focus { border-color: var(–orange); }
+.why-input-wrap input::placeholder { color: #555; }
+
+.why-input-wrap .mic-btn {
+top: 50%;
+transform: translateY(-50%);
+right: 6px;
+width: 30px;
+height: 30px;
+font-size: 13px;
+}
+
+.add-why-btn {
+background: transparent;
+color: var(–orange);
+border: 1px dashed var(–orange);
+padding: 8px 16px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+letter-spacing: 1px;
+cursor: pointer;
+margin-top: 4px;
+}
+
+.nameless-banner {
+background: rgba(255,107,0,0.1);
+border: 1px solid var(–orange);
+padding: 10px 14px;
+margin-bottom: 16px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 11px;
+color: var(–orange);
+letter-spacing: 1px;
+}
+
+@media (max-width: 480px) {
+.header h1 { font-size: 40px; }
+.step-letter { font-size: 60px; }
+.timer-display { font-size: 28px; }
+.summary-action-row { grid-template-columns: 1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">Construction School — Daily Debrief</div>
+  <h1>ORCA<br>LIVE</h1>
+  <div class="header-sub">14.4 MIN &nbsp;·&nbsp; 1% OF YOUR DAY &nbsp;·&nbsp; NAMELESS &amp; RANKLESS</div>
+</div>
+
+<div class="timer-bar">
+  <div>
+    <div class="timer-label">ELAPSED</div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+  </div>
+  <button class="timer-btn" id="timerBtn" onclick="toggleTimer()">START</button>
+</div>
+
+<div class="progress-rail">
+  <div class="step-tab active" id="tab-0" onclick="goToStep(0)">O</div>
+  <div class="step-tab" id="tab-1" onclick="goToStep(1)">R</div>
+  <div class="step-tab" id="tab-2" onclick="goToStep(2)">C</div>
+  <div class="step-tab" id="tab-3" onclick="goToStep(3)">A</div>
+  <div class="step-tab" id="tab-4" onclick="goToStep(4)">✓</div>
+</div>
+
+<div class="main">
+
+  <div class="no-mic-note" id="noMicNote">
+    🎤 Voice input not supported on this browser. Use Chrome on Android or Safari on iPhone for voice.
+  </div>
+
+  <!-- STEP O -->
+
+  <div class="step-panel active" id="panel-0">
+    <div class="step-header">
+      <span class="step-letter">O</span>
+      <span class="step-name">Objective</span>
+      <div class="step-rule">What did we set out to do?<br>One clear, measurable target for the session or day.</div>
+    </div>
+    <div class="question">What was the objective today?</div>
+    <div class="voice-wrap">
+      <textarea id="objective" placeholder="Tap 🎤 to speak or type your objective..." rows="3"></textarea>
+      <button class="mic-btn" onclick="startVoice('objective', this)" title="Speak your answer">🎤</button>
+    </div>
+    <div class="voice-status" id="vs-objective">● LISTENING...</div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="nextStep(0)">NEXT — RESULT →</button>
+    </div>
+  </div>
+
+  <!-- STEP R -->
+
+  <div class="step-panel" id="panel-1">
+    <div class="step-header">
+      <span class="step-letter">R</span>
+      <span class="step-name">Result</span>
+      <div class="step-rule">What actually happened? Identify the gap.<br>One result to debrief — success or failure.</div>
+    </div>
+    <div class="question">What actually happened?</div>
+    <div class="voice-wrap">
+      <textarea id="result" placeholder="Tap 🎤 to speak or type the result..." rows="3"></textarea>
+      <button class="mic-btn" onclick="startVoice('result', this)" title="Speak your answer">🎤</button>
+    </div>
+    <div class="voice-status" id="vs-result">● LISTENING...</div>
+
+```
+<div class="question" style="margin-top:16px;">What is the execution gap?</div>
+<div class="voice-wrap">
+  <textarea id="gap" placeholder="The difference between objective and result..." rows="2"></textarea>
+  <button class="mic-btn" onclick="startVoice('gap', this)" title="Speak your answer">🎤</button>
+</div>
+<div class="voice-status" id="vs-gap">● LISTENING...</div>
+
+<div class="btn-row">
+  <button class="btn-secondary" onclick="prevStep(1)">← BACK</button>
+  <button class="btn-primary" onclick="nextStep(1)">NEXT — CAUSE →</button>
+</div>
+```
+
+  </div>
+
+  <!-- STEP C -->
+
+  <div class="step-panel" id="panel-2">
+    <div class="step-header">
+      <span class="step-letter">C</span>
+      <span class="step-name">Cause</span>
+      <div class="step-rule">Ask WHY until you land on the root cause.<br>One or two causes max. No blame — just what caused it.</div>
+    </div>
+    <div class="nameless-banner">⚠ NAMELESS &amp; RANKLESS — No blame. No finger pointing. Just causes.</div>
+
+```
+<div class="question">Keep asking WHY until you hit the root.</div>
+<div class="why-chain" id="whyChain">
+  <div class="why-item">
+    <div class="why-badge">WHY 1</div>
+    <div class="why-input-wrap">
+      <input placeholder="Why did the gap occur?" />
+      <button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling, this)" title="Speak">🎤</button>
+    </div>
+  </div>
+  <div class="why-item">
+    <div class="why-badge">WHY 2</div>
+    <div class="why-input-wrap">
+      <input placeholder="Why did that happen?" />
+      <button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling, this)" title="Speak">🎤</button>
+    </div>
+  </div>
+</div>
+<button class="add-why-btn" onclick="addWhy()">+ ADD ANOTHER WHY</button>
+
+<div class="cause-cats" style="margin-top:20px;">
+  <div class="cause-cat-title">ROOT CAUSE CATEGORY</div>
+
+  <div class="cause-cat-title" style="margin-top:10px;color:var(--yellow);">ORGANISATION</div>
+  <div class="cause-tags">
+    <div class="cause-tag" onclick="toggleTag(this)">Knowledge</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Experience</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Tools</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Strategy</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Leadership</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Culture</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Trust</div>
+  </div>
+
+  <div class="cause-cat-title" style="color:var(--yellow);">PLAN / COMMUNICATION</div>
+  <div class="cause-tags">
+    <div class="cause-tag" onclick="toggleTag(this)">Objectives</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Resource Allocation</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Communication</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Standards / Procedures</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Roles &amp; Responsibilities</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Metrics</div>
+    <div class="cause-tag" onclick="toggleTag(this)">External Threats</div>
+  </div>
+
+  <div class="cause-cat-title" style="color:var(--yellow);">EXECUTION</div>
+  <div class="cause-tags">
+    <div class="cause-tag" onclick="toggleTag(this)">Prioritisation</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Distraction</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Error / Omission</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Situational Awareness</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Interpretation</div>
+    <div class="cause-tag" onclick="toggleTag(this)">Motivation</div>
+  </div>
+</div>
+
+<div class="question">State your root cause(s) — max two.</div>
+<div class="voice-wrap">
+  <textarea id="cause" placeholder="Tap 🎤 to speak or type root cause(s)..." rows="3"></textarea>
+  <button class="mic-btn" onclick="startVoice('cause', this)" title="Speak your answer">🎤</button>
+</div>
+<div class="voice-status" id="vs-cause">● LISTENING...</div>
+
+<div class="btn-row">
+  <button class="btn-secondary" onclick="prevStep(2)">← BACK</button>
+  <button class="btn-primary" onclick="nextStep(2)">NEXT — ACTION →</button>
+</div>
+```
+
+  </div>
+
+  <!-- STEP A -->
+
+  <div class="step-panel" id="panel-3">
+    <div class="step-header">
+      <span class="step-letter">A</span>
+      <span class="step-name">Action</span>
+      <div class="step-rule">Each cause gets one action. Max three total.<br>WHO does WHAT by WHEN. Small 1% improvements only.</div>
+    </div>
+
+```
+<div class="action-block">
+  <div class="action-block-title">ACTION 1</div>
+  <div class="action-label">WHO</div>
+  <div class="action-input-wrap">
+    <input id="a1-who" placeholder="Name or role..." />
+    <button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling, this)">🎤</button>
+  </div>
+  <div class="action-label">WHAT</div>
+  <div class="action-input-wrap">
+    <input id="a1-what" placeholder="Specific action..." />
+    <button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling, this)">🎤</button>
+  </div>
+  <div class="action-label">BY WHEN</div>
+  <div class="action-input-wrap">
+    <input id="a1-when" placeholder="Date / time..." />
+    <button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling, this)">🎤</button>
+  </div>
+</div>
+
+<div class="action-block" id="action2" style="display:none;">
+  <div class="action-block-title">ACTION 2</div>
+  <div class="action-label">WHO</div>
+  <div class="action-input-wrap"><input id="a2-who" placeholder="Name or role..." /><button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling,this)">🎤</button></div>
+  <div class="action-label">WHAT</div>
+  <div class="action-input-wrap"><input id="a2-what" placeholder="Specific action..." /><button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling,this)">🎤</button></div>
+  <div class="action-label">BY WHEN</div>
+  <div class="action-input-wrap"><input id="a2-when" placeholder="Date / time..." /><button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling,this)">🎤</button></div>
+</div>
+
+<div class="action-block" id="action3" style="display:none;">
+  <div class="action-block-title">ACTION 3</div>
+  <div class="action-label">WHO</div>
+  <div class="action-input-wrap"><input id="a3-who" placeholder="Name or role..." /><button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling,this)">🎤</button></div>
+  <div class="action-label">WHAT</div>
+  <div class="action-input-wrap"><input id="a3-what" placeholder="Specific action..." /><button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling,this)">🎤</button></div>
+  <div class="action-label">BY WHEN</div>
+  <div class="action-input-wrap"><input id="a3-when" placeholder="Date / time..." /><button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling,this)">🎤</button></div>
+</div>
+
+<button class="add-why-btn" id="addActionBtn" onclick="addAction()" style="margin-top:8px;">+ ADD ACTION</button>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:8px;">MAX 3 ACTIONS</div>
+
+<div class="btn-row">
+  <button class="btn-secondary" onclick="prevStep(3)">← BACK</button>
+  <button class="btn-primary" onclick="nextStep(3)">COMPLETE DEBRIEF →</button>
+</div>
+```
+
+  </div>
+
+  <!-- SUMMARY -->
+
+  <div class="step-panel" id="panel-4">
+    <div class="complete-banner">
+      <h2>DEBRIEF COMPLETE</h2>
+      <p id="finalTime">TIME: 00:00 · 1% OF YOUR DAY INVESTED</p>
+    </div>
+
+```
+<div class="summary-block">
+  <div class="summary-label">O — OBJECTIVE</div>
+  <div class="summary-text" id="sum-objective"></div>
+</div>
+
+<div class="summary-block">
+  <div class="summary-label">R — RESULT</div>
+  <div class="summary-text" id="sum-result"></div>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--mid);">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:4px;">GAP</div>
+    <div class="summary-text" id="sum-gap"></div>
+  </div>
+</div>
+
+<div class="summary-block">
+  <div class="summary-label">C — CAUSE</div>
+  <div class="summary-text" id="sum-cause"></div>
+  <div id="sum-tags" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+</div>
+
+<div class="summary-block">
+  <div class="summary-label">A — ACTIONS</div>
+  <div id="sum-actions"></div>
+</div>
+
+<button class="copy-btn" onclick="copyDebrief()">COPY DEBRIEF TO CLIPBOARD</button>
+<button class="reset-btn" onclick="resetAll()">START NEW DEBRIEF</button>
+```
+
+  </div>
+
+</div>
+
+<script>
+  // ── VOICE ENGINE ──────────────────────────────────────────────
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let activeBtn = null;
+  let activeTarget = null;
+
+  if (!SpeechRecognition) {
+    document.getElementById('noMicNote').style.display = 'block';
+    document.querySelectorAll('.mic-btn').forEach(b => b.style.display = 'none');
+  } else {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-AU';
+
+    recognition.onstart = () => {
+      if (activeBtn) activeBtn.classList.add('listening');
+      showStatus(activeTarget);
+    };
+
+    recognition.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+      if (activeTarget) {
+        if (activeTarget.tagName === 'TEXTAREA') {
+          activeTarget.value = transcript;
+        } else {
+          activeTarget.value = transcript;
+        }
+      }
+    };
+
+    recognition.onend = () => {
+      if (activeBtn) activeBtn.classList.remove('listening');
+      hideStatus(activeTarget);
+      activeBtn = null;
+      activeTarget = null;
+    };
+
+    recognition.onerror = (e) => {
+      if (activeBtn) activeBtn.classList.remove('listening');
+      hideStatus(activeTarget);
+      activeBtn = null;
+      activeTarget = null;
+    };
+  }
+
+  function startVoice(fieldId, btn) {
+    if (!recognition) return;
+    const el = document.getElementById(fieldId);
+    startVoiceInput(el, btn);
+  }
+
+  function startVoiceInput(inputEl, btn) {
+    if (!recognition) return;
+    // If already listening to this field, stop
+    if (activeBtn === btn) {
+      recognition.stop();
+      return;
+    }
+    // Stop any current recognition
+    if (activeBtn) {
+      recognition.stop();
+    }
+    activeTarget = inputEl;
+    activeBtn = btn;
+    try { recognition.start(); } catch(e) {}
+  }
+
+  function showStatus(el) {
+    if (!el) return;
+    const id = el.id ? `vs-${el.id}` : null;
+    if (id) {
+      const s = document.getElementById(id);
+      if (s) s.classList.add('active');
+    }
+  }
+
+  function hideStatus(el) {
+    if (!el) return;
+    const id = el.id ? `vs-${el.id}` : null;
+    if (id) {
+      const s = document.getElementById(id);
+      if (s) s.classList.remove('active');
+    }
+  }
+
+  // ── TIMER ─────────────────────────────────────────────────────
+  let timerRunning = false;
+  let timerSeconds = 0;
+  let timerInterval = null;
+  const WARNING_SECONDS = 14 * 60 + 24;
+
+  function toggleTimer() {
+    if (!timerRunning) {
+      timerRunning = true;
+      document.getElementById('timerBtn').textContent = 'PAUSE';
+      document.getElementById('timerBtn').classList.add('running');
+      timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+        if (timerSeconds >= WARNING_SECONDS) {
+          document.getElementById('timerDisplay').style.color = 'var(--orange)';
+        }
+      }, 1000);
+    } else {
+      timerRunning = false;
+      document.getElementById('timerBtn').textContent = 'RESUME';
+      document.getElementById('timerBtn').classList.remove('running');
+      clearInterval(timerInterval);
+    }
+  }
+
+  function updateTimerDisplay() {
+    const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+    const s = String(timerSeconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  }
+
+  function getTimerString() {
+    return `${Math.floor(timerSeconds/60)}m ${timerSeconds%60}s`;
+  }
+
+  // ── NAVIGATION ────────────────────────────────────────────────
+  let currentStep = 0;
+  let actionCount = 1;
+  let whyCount = 2;
+
+  function goToStep(n) {
+    document.getElementById(`panel-${currentStep}`).classList.remove('active');
+    document.getElementById(`tab-${currentStep}`).classList.remove('active');
+    currentStep = n;
+    document.getElementById(`panel-${currentStep}`).classList.add('active');
+    document.getElementById(`tab-${currentStep}`).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function nextStep(from) {
+    document.getElementById(`tab-${from}`).classList.add('complete');
+    if (from === 3) buildSummary();
+    goToStep(from + 1);
+    if (!timerRunning && from === 0) toggleTimer();
+  }
+
+  function prevStep(from) { goToStep(from - 1); }
+
+  // ── WHY CHAIN ─────────────────────────────────────────────────
+  function addWhy() {
+    if (whyCount >= 5) return;
+    whyCount++;
+    const chain = document.getElementById('whyChain');
+    const div = document.createElement('div');
+    div.className = 'why-item';
+    div.innerHTML = `
+      <div class="why-badge">WHY ${whyCount}</div>
+      <div class="why-input-wrap">
+        <input placeholder="Keep digging..." />
+        <button class="mic-btn" onclick="startVoiceInput(this.previousElementSibling, this)">🎤</button>
+      </div>`;
+    chain.appendChild(div);
+  }
+
+  // ── CAUSE TAGS ────────────────────────────────────────────────
+  let selectedTags = [];
+
+  function toggleTag(el) {
+    el.classList.toggle('selected');
+    const tag = el.textContent;
+    if (el.classList.contains('selected')) {
+      selectedTags.push(tag);
+    } else {
+      selectedTags = selectedTags.filter(t => t !== tag);
+    }
+  }
+
+  // ── ACTIONS ───────────────────────────────────────────────────
+  function addAction() {
+    if (actionCount >= 3) return;
+    actionCount++;
+    document.getElementById(`action${actionCount}`).style.display = 'block';
+    if (actionCount === 3) document.getElementById('addActionBtn').style.display = 'none';
+  }
+
+  // ── SUMMARY ───────────────────────────────────────────────────
+  function buildSummary() {
+    if (timerRunning) toggleTimer();
+    document.getElementById('finalTime').textContent = `TIME: ${getTimerString()} · 1% OF YOUR DAY INVESTED`;
+    document.getElementById('sum-objective').textContent = document.getElementById('objective').value || '—';
+    document.getElementById('sum-result').textContent = document.getElementById('result').value || '—';
+    document.getElementById('sum-gap').textContent = document.getElementById('gap').value || '—';
+    document.getElementById('sum-cause').textContent = document.getElementById('cause').value || '—';
+
+    const tagContainer = document.getElementById('sum-tags');
+    tagContainer.innerHTML = '';
+    selectedTags.forEach(t => {
+      const span = document.createElement('span');
+      span.style.cssText = 'font-family:IBM Plex Mono,monospace;font-size:11px;padding:4px 10px;border:1px solid #CC4A1A;color:#CC4A1A;';
+      span.textContent = t;
+      tagContainer.appendChild(span);
+    });
+
+    const actionsDiv = document.getElementById('sum-actions');
+    actionsDiv.innerHTML = '';
+    for (let i = 1; i <= actionCount; i++) {
+      const who = document.getElementById(`a${i}-who`)?.value;
+      const what = document.getElementById(`a${i}-what`)?.value;
+      const when = document.getElementById(`a${i}-when`)?.value;
+      if (who || what || when) {
+        actionsDiv.innerHTML += `
+          <div class="summary-action-row" style="margin-bottom:8px;">
+            <div class="summary-action-cell"><span>WHO</span>${who||'—'}</div>
+            <div class="summary-action-cell"><span>WHAT</span>${what||'—'}</div>
+            <div class="summary-action-cell"><span>BY WHEN</span>${when||'—'}</div>
+          </div>`;
+      }
+    }
+  }
+
+  function copyDebrief() {
+    let text = `ORCA DEBRIEF — ${new Date().toLocaleDateString('en-AU')}\nTime: ${getTimerString()}\n\n`;
+    text += `OBJECTIVE\n${document.getElementById('objective').value}\n\n`;
+    text += `RESULT\n${document.getElementById('result').value}\n\nGAP\n${document.getElementById('gap').value}\n\n`;
+    text += `CAUSE\n${document.getElementById('cause').value}`;
+    if (selectedTags.length) text += `\nCategory: ${selectedTags.join(', ')}`;
+    text += `\n\nACTIONS\n`;
+    for (let i = 1; i <= actionCount; i++) {
+      const w = document.getElementById(`a${i}-who`)?.value;
+      const wh = document.getElementById(`a${i}-what`)?.value;
+      const wn = document.getElementById(`a${i}-when`)?.value;
+      if (w || wh || wn) text += `${i}. WHO: ${w} | WHAT: ${wh} | BY: ${wn}\n`;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'COPIED ✓';
+      setTimeout(() => btn.textContent = 'COPY DEBRIEF TO CLIPBOARD', 2000);
+    });
+  }
+
+  function resetAll() {
+    if (!confirm('Start a new debrief? Current data will be cleared.')) return;
+    location.reload();
+  }
+</script>
+
+</body>
+</html>
