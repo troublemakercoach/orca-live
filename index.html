@@ -852,9 +852,10 @@ letter-spacing: 1px;
     document.querySelectorAll('.mic-btn').forEach(b => b.style.display = 'none');
   } else {
     recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-AU';
+    recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
       if (activeBtn) activeBtn.classList.add('listening');
@@ -862,21 +863,30 @@ letter-spacing: 1px;
     };
 
     recognition.onresult = (e) => {
-      let transcript = '';
+      let finalTranscript = '';
+      let interimTranscript = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        transcript += e.results[i][0].transcript;
+        if (e.results[i].isFinal) {
+          finalTranscript += e.results[i][0].transcript;
+        } else {
+          interimTranscript += e.results[i][0].transcript;
+        }
       }
       if (activeTarget) {
-        if (activeTarget.tagName === 'TEXTAREA') {
-          activeTarget.value = transcript;
-        } else {
-          activeTarget.value = transcript;
+        const existing = activeTarget.dataset.confirmed || '';
+        activeTarget.value = existing + finalTranscript + interimTranscript;
+        if (finalTranscript) {
+          activeTarget.dataset.confirmed = existing + finalTranscript;
         }
       }
     };
 
     recognition.onend = () => {
-      if (activeBtn) activeBtn.classList.remove('listening');
+      if (activeBtn) {
+        activeBtn.classList.remove('listening');
+        // Clear confirmed buffer
+        if (activeTarget) delete activeTarget.dataset.confirmed;
+      }
       hideStatus(activeTarget);
       activeBtn = null;
       activeTarget = null;
@@ -885,6 +895,15 @@ letter-spacing: 1px;
     recognition.onerror = (e) => {
       if (activeBtn) activeBtn.classList.remove('listening');
       hideStatus(activeTarget);
+      if (activeTarget) delete activeTarget.dataset.confirmed;
+      // Show user-facing error for common issues
+      if (e.error === 'not-allowed') {
+        document.getElementById('noMicNote').style.display = 'block';
+        document.getElementById('noMicNote').textContent = '🎤 Microphone access denied. Allow mic access in your browser settings and reload.';
+      } else if (e.error === 'network') {
+        document.getElementById('noMicNote').style.display = 'block';
+        document.getElementById('noMicNote').textContent = '🎤 Network error. Voice input needs an internet connection.';
+      }
       activeBtn = null;
       activeTarget = null;
     };
@@ -903,13 +922,17 @@ letter-spacing: 1px;
       recognition.stop();
       return;
     }
-    // Stop any current recognition
+    // Stop any current recognition before starting new one
     if (activeBtn) {
-      recognition.stop();
+      recognition.abort();
     }
     activeTarget = inputEl;
     activeBtn = btn;
-    try { recognition.start(); } catch(e) {}
+    if (activeTarget) activeTarget.dataset.confirmed = activeTarget.value;
+    try { recognition.start(); } catch(e) {
+      activeBtn = null;
+      activeTarget = null;
+    }
   }
 
   function showStatus(el) {
