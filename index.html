@@ -31,26 +31,37 @@ overflow-x: hidden;
 
 .header {
 background: #CC4A1A;
-padding: 0;
+padding: 24px 20px 20px;
 position: relative;
 overflow: hidden;
 display: flex;
-flex-direction: row;
-align-items: flex-start;
+flex-direction: column;
+align-items: center;
+text-align: center;
 }
 .header-img {
-height: 130px;
+height: 120px;
 width: auto;
-flex-shrink: 0;
 display: block;
+margin-bottom: 8px;
 }
 .header-content {
-padding: 16px 16px 14px 12px;
-flex: 1;
-min-width: 0;
+width: 100%;
 }
-@media (max-width: 480px) {
-.header-img { height: 90px; }
+.header-content h1 {
+text-align: center;
+}
+.header-content .header-tag {
+text-align: center;
+font-size: 13px;
+margin-bottom: 4px;
+}
+.header-content .header-sub {
+text-align: left;
+margin-top: 12px;
+}
+.header-content a {
+text-align: left;
 }
 
 .header::after {
@@ -602,9 +613,9 @@ letter-spacing: 1px;
     <div class="header-tag">Construction School — Daily Debrief</div>
     <h1>CATALYST<br>DAILY LOOP</h1>
     <div class="header-sub">14.4 MIN &nbsp;·&nbsp; 1% OF YOUR DAY &nbsp;·&nbsp; NAMELESS &amp; RANKLESS</div>
-    <a href="https://troublemakercoach.github.io/orca-live/" target="_blank" style="display:inline-block;margin-top:12px;background:#0a0a0a;color:#F5F0E8;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;padding:8px 16px;text-decoration:none;border:1px solid rgba(255,255,255,0.2);text-transform:uppercase;">↗ OPEN FULL SCREEN — VOICE INPUT</a>
   </div>
 </div>
+
 
 <div class="timer-bar">
   <div>
