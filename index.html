@@ -30,38 +30,32 @@ overflow-x: hidden;
 }
 
 .header {
-background: #CC4A1A;
-padding: 24px 20px 20px;
 position: relative;
 overflow: hidden;
-display: flex;
-flex-direction: column;
-align-items: center;
-text-align: center;
-}
-.header-img {
-height: 120px;
-width: auto;
-display: block;
-margin-bottom: 8px;
-}
-.header-content {
+background: #000;
 width: 100%;
 }
-.header-content h1 {
-text-align: center;
+.header-img {
+width: 100%;
+height: auto;
+display: block;
 }
-.header-content .header-tag {
-text-align: center;
-font-size: 13px;
+.header-content {
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+padding: 32px 20px 20px;
+background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+}
+.header-content h1 {
+text-align: left;
 margin-bottom: 4px;
 }
 .header-content .header-sub {
 text-align: left;
-margin-top: 12px;
-}
-.header-content a {
-text-align: left;
+color: rgba(255,255,255,0.75);
+margin-top: 4px;
 }
 
 .header::after {
@@ -184,11 +178,7 @@ margin: 0 auto;
 .step-header { margin-bottom: 20px; }
 
 .step-letter {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 80px;
-line-height: 0.85;
-color: #CC4A1A;
-display: inline-block;
+display: none;
 }
 
 .step-name {
@@ -608,7 +598,7 @@ letter-spacing: 1px;
 <body>
 
 <div class="header">
-  <img src="beanie.png" alt="" class="header-img">
+  <img src="header.png" alt="" class="header-img">
   <div class="header-content">
     <h1>CATALYST<br>DAILY LOOP</h1>
     <div class="header-sub">See it. Stop it. Share it. Spread it.</div>
