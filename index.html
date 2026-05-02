@@ -857,6 +857,16 @@ letter-spacing: 1px;
 
 <button class="copy-btn" onclick="copyDebrief()">COPY DEBRIEF TO CLIPBOARD</button>
 
+<!-- Daily Reminder -->
+<div style="margin-top:16px;padding:16px;background:#1a1a1a;border:1px solid #2a2a2a;">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:#888;margin-bottom:8px;">SET YOUR DAILY TRIGGER</div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <input type="time" id="reminder-time" value="07:00" style="background:#0a0a0a;color:#F5F0E8;border:1px solid #444;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:1rem;flex:1;min-width:120px;">
+    <button onclick="setReminder()" style="background:#CC4A1A;color:#F5F0E8;border:none;padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;cursor:pointer;white-space:nowrap;">⏰ ADD TO CALENDAR</button>
+  </div>
+  <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.75rem;color:#555;margin-top:8px;">Pick your time. One tap. Repeats daily.</div>
+</div>
+
 <a href="https://www.skool.com/scrum" target="_blank" style="display:block;width:100%;margin-top:12px;padding:16px;background:#CC4A1A;color:#F5F0E8;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">📣 Share to Construction Skool →</a>
 
 <div style="margin-top:24px;padding:20px;border:1px solid #2a2a2a;background:#111;">
@@ -1182,6 +1192,39 @@ letter-spacing: 1px;
   function resetAll() {
     if (!confirm('Start a new debrief? Current data will be cleared.')) return;
     location.reload();
+  }
+
+  function setReminder() {
+    const timeInput = document.getElementById('reminder-time').value || '07:00';
+    const [hours, minutes] = timeInput.split(':');
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const dateStr = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+    const dtStart = `${dateStr}T${hours}${minutes}00`;
+    const endMin = pad((parseInt(minutes) + 15) % 60);
+    const endHour = pad(parseInt(hours) + (parseInt(minutes) + 15 >= 60 ? 1 : 0));
+    const dtEnd = `${dateStr}T${endHour}${endMin}00`;
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Catalyst Daily Loop//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${dtStart}`,
+      `DTEND:${dtEnd}`,
+      'RRULE:FREQ=DAILY',
+      'SUMMARY:Catalyst Daily Loop — Run your ORCA',
+      'DESCRIPTION:Daily debrief. 14 minutes. See it. Stop it. Share it. Spread it.\\nhttps://troublemakercoach.github.io/orca-live/',
+      'URL:https://troublemakercoach.github.io/orca-live/',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'catalyst-daily-loop.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 </script>
 
