@@ -95,29 +95,6 @@ color: rgba(255,255,255,0.65);
 margin-top: 8px;
 }
 
-.timer-bar {
-background: #0a0a0a;
-border-bottom: 1px solid #2a2a2a;
-padding: 12px 24px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-}
-
-.timer-display {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 36px;
-color: #CC4A1A;
-letter-spacing: 2px;
-transition: color 0.3s;
-}
-
-.timer-label {
-font-family: ‘IBM Plex Mono’, monospace;
-font-size: 11px;
-color: #888;
-letter-spacing: 2px;
-}
 
 
 .progress-rail {
@@ -573,7 +550,6 @@ letter-spacing: 1px;
 @media (max-width: 480px) {
 .header h1 { font-size: 40px; }
 .step-letter { font-size: 60px; }
-.timer-display { font-size: 28px; }
 .summary-action-row { grid-template-columns: 1fr; }
 }
 </style>
@@ -590,12 +566,6 @@ letter-spacing: 1px;
 </div>
 
 
-<div class="timer-bar">
-  <div>
-    <div class="timer-label">ELAPSED</div>
-    <div class="timer-display" id="timerDisplay">00:00</div>
-  </div>
-</div>
 
 <div class="progress-rail">
   <div class="step-tab active" id="tab-0" onclick="goToStep(0)">O</div>
@@ -983,31 +953,17 @@ letter-spacing: 1px;
   let timerRunning = false;
   let timerSeconds = 0;
   let timerInterval = null;
-  const WARNING_SECONDS = 14 * 60 + 24;
-
-  function toggleTimer() {
+function toggleTimer() {
     if (!timerRunning) {
       timerRunning = true;
-      timerInterval = setInterval(() => {
-        timerSeconds++;
-        updateTimerDisplay();
-        if (timerSeconds >= WARNING_SECONDS) {
-          document.getElementById('timerDisplay').style.color = '#e85520';
-        }
-      }, 1000);
+      timerInterval = setInterval(() => { timerSeconds++; }, 1000);
     } else {
       timerRunning = false;
       clearInterval(timerInterval);
     }
   }
 
-  function updateTimerDisplay() {
-    const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
-    const s = String(timerSeconds % 60).padStart(2, '0');
-    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
-  }
-
-  function getTimerString() {
+function getTimerString() {
     return `${Math.floor(timerSeconds/60)}m ${timerSeconds%60}s`;
   }
 
