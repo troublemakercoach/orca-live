@@ -31,9 +31,26 @@ overflow-x: hidden;
 
 .header {
 background: #CC4A1A;
-padding: 20px 24px 16px;
+padding: 0;
 position: relative;
 overflow: hidden;
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+}
+.header-img {
+height: 130px;
+width: auto;
+flex-shrink: 0;
+display: block;
+}
+.header-content {
+padding: 16px 16px 14px 12px;
+flex: 1;
+min-width: 0;
+}
+@media (max-width: 480px) {
+.header-img { height: 90px; }
 }
 
 .header::after {
@@ -579,9 +596,9 @@ letter-spacing: 1px;
 </head>
 <body>
 
-<div class="header" style="display:flex;flex-direction:row;align-items:flex-start;padding:0;overflow:hidden;">
-  <img src="beanie.png" alt="" style="height:180px;width:auto;flex-shrink:0;align-self:flex-start;margin-right:16px;">
-  <div style="padding:20px 20px 16px 0;flex:1;">
+<div class="header">
+  <img src="beanie.png" alt="" class="header-img">
+  <div class="header-content">
     <div class="header-tag">Construction School — Daily Debrief</div>
     <h1>CATALYST<br>DAILY LOOP</h1>
     <div class="header-sub">14.4 MIN &nbsp;·&nbsp; 1% OF YOUR DAY &nbsp;·&nbsp; NAMELESS &amp; RANKLESS</div>
