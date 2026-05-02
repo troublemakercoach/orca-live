@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ORCA Live — Daily Debrief Tool</title>
+<title>Catalyst Daily Loop — Daily Debrief Tool</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;700&display=swap');
 
@@ -581,7 +581,7 @@ letter-spacing: 1px;
 
 <div class="header">
   <div class="header-tag">Construction School — Daily Debrief</div>
-  <h1>ORCA<br>LIVE</h1>
+  <h1>CATALYST<br>DAILY LOOP</h1>
   <div class="header-sub">14.4 MIN &nbsp;·&nbsp; 1% OF YOUR DAY &nbsp;·&nbsp; NAMELESS &amp; RANKLESS</div>
   <a href="https://troublemakercoach.github.io/orca-live/" target="_blank" style="display:inline-block;margin-top:12px;background:#0a0a0a;color:#F5F0E8;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;padding:8px 16px;text-decoration:none;border:1px solid rgba(255,255,255,0.2);text-transform:uppercase;">↗ OPEN FULL SCREEN — VOICE INPUT</a>
 </div>
@@ -833,7 +833,19 @@ letter-spacing: 1px;
   <div id="sum-actions"></div>
 </div>
 
+<div id="streak-display" style="margin:24px 0 16px;text-align:center;"></div>
+
 <button class="copy-btn" onclick="copyDebrief()">COPY DEBRIEF TO CLIPBOARD</button>
+
+<a href="https://www.skool.com/scrum" target="_blank" style="display:block;width:100%;margin-top:12px;padding:16px;background:#CC4A1A;color:#F5F0E8;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">📣 Share to Construction Skool →</a>
+
+<div style="margin-top:24px;padding:20px;border:1px solid #2a2a2a;background:#111;">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:#888;margin-bottom:8px;">WANT TO DO THIS WITH YOUR WHOLE TEAM?</div>
+  <div style="font-family:'IBM Plex Sans',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px;">Join Catalyst Academy</div>
+  <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.85rem;color:#888;margin-bottom:16px;">Where operators learn to run ORCA, spot signals, and create change without authority.</div>
+  <a href="https://www.skool.com/scrum" target="_blank" style="display:block;padding:14px;background:#F5F0E8;color:#0a0a0a;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">JOIN CATALYST ACADEMY →</a>
+</div>
+
 <button class="reset-btn" onclick="resetAll()">START NEW DEBRIEF</button>
 ```
 
@@ -1051,8 +1063,49 @@ letter-spacing: 1px;
   }
 
   // ── SUMMARY ───────────────────────────────────────────────────
+  // ── STREAK ────────────────────────────────────────────────────
+  const STREAK_KEY = 'catalystLoopDates';
+
+  function loadDates() {
+    try { return JSON.parse(localStorage.getItem(STREAK_KEY) || '[]'); } catch(e) { return []; }
+  }
+
+  function todayStr() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  function markToday() {
+    const dates = loadDates();
+    const t = todayStr();
+    if (!dates.includes(t)) { dates.push(t); dates.sort(); localStorage.setItem(STREAK_KEY, JSON.stringify(dates)); }
+  }
+
+  function renderStreak() {
+    const el = document.getElementById('streak-display');
+    if (!el) return;
+    const dates = loadDates();
+    if (!dates.length) { el.innerHTML = ''; return; }
+    const set = new Set(dates);
+    const first = new Date(dates[0] + 'T00:00:00');
+    const today = new Date(todayStr() + 'T00:00:00');
+    const all = [];
+    for (let d = new Date(first); d <= today; d.setDate(d.getDate() + 1)) {
+      all.push(d.toISOString().split('T')[0]);
+    }
+    const show = all.slice(-30);
+    let streak = 0;
+    for (let i = all.length - 1; i >= 0; i--) { if (set.has(all[i])) streak++; else break; }
+    const flames = show.map(d => set.has(d) ? '🔥' : '❌').join('');
+    el.innerHTML = `
+      <div style="font-size:1.4rem;letter-spacing:3px;line-height:2;word-break:break-all;">${flames}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#CC4A1A;margin-top:4px;">
+        ${streak > 0 ? `🔥 ${streak} DAY STREAK` : 'STREAK BROKEN — BACK AT IT TODAY'}
+      </div>`;
+  }
+
   function buildSummary() {
     if (timerRunning) toggleTimer();
+    markToday();
     document.getElementById('finalTime').textContent = `TIME: ${getTimerString()} · 1% OF YOUR DAY INVESTED`;
     document.getElementById('sum-objective').textContent = document.getElementById('objective').value || '—';
     document.getElementById('sum-result').textContent = document.getElementById('result').value || '—';
@@ -1083,6 +1136,7 @@ letter-spacing: 1px;
           </div>`;
       }
     }
+    renderStreak();
   }
 
   function copyDebrief() {
