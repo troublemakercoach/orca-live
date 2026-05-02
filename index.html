@@ -119,22 +119,6 @@ color: #888;
 letter-spacing: 2px;
 }
 
-.timer-btn {
-background: #CC4A1A;
-color: #ffffff;
-border: none;
-padding: 8px 20px;
-font-family: ‘IBM Plex Mono’, monospace;
-font-size: 12px;
-font-weight: 600;
-letter-spacing: 2px;
-cursor: pointer;
-text-transform: uppercase;
-transition: background 0.15s;
-}
-
-.timer-btn:hover { background: #e85520; color: white; }
-.timer-btn.running { background: #e85520; color: white; }
 
 .progress-rail {
 display: flex;
@@ -611,7 +595,6 @@ letter-spacing: 1px;
     <div class="timer-label">ELAPSED</div>
     <div class="timer-display" id="timerDisplay">00:00</div>
   </div>
-  <button class="timer-btn" id="timerBtn" onclick="toggleTimer()">START</button>
 </div>
 
 <div class="progress-rail">
@@ -1005,8 +988,6 @@ letter-spacing: 1px;
   function toggleTimer() {
     if (!timerRunning) {
       timerRunning = true;
-      document.getElementById('timerBtn').textContent = 'PAUSE';
-      document.getElementById('timerBtn').classList.add('running');
       timerInterval = setInterval(() => {
         timerSeconds++;
         updateTimerDisplay();
@@ -1016,8 +997,6 @@ letter-spacing: 1px;
       }, 1000);
     } else {
       timerRunning = false;
-      document.getElementById('timerBtn').textContent = 'RESUME';
-      document.getElementById('timerBtn').classList.remove('running');
       clearInterval(timerInterval);
     }
   }
