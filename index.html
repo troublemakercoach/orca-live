@@ -191,6 +191,7 @@ width: 100%;
 
 textarea {
 width: 100%;
+max-width: 100%;
 background: #2a2a2a;
 border: 1px solid #333;
 border-top: 2px solid #CC4A1A;
@@ -325,6 +326,7 @@ flex-direction: column;
 
 .action-input-wrap input {
 width: 100%;
+max-width: 100%;
 background: #2a2a2a;
 border: 1px solid #333;
 border-top: 2px solid #e85520;
@@ -501,12 +503,15 @@ flex-shrink: 0;
 
 .why-input-wrap {
 flex: 1;
+min-width: 0;
+max-width: 100%;
 display: flex;
 flex-direction: column;
 }
 
 .why-input-wrap input {
 width: 100%;
+max-width: 100%;
 background: #2a2a2a;
 border: 1px solid #333;
 color: #F5F0E8;
@@ -775,6 +780,20 @@ letter-spacing: 1px;
 <button class="add-why-btn" id="addActionBtn" onclick="addAction()" style="margin-top:8px;">+ ADD ACTION</button>
 <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#888;margin-top:8px;">MAX 3 ACTIONS</div>
 
+<div style="margin-top:28px;padding-top:20px;border-top:1px solid #2a2a2a;">
+  <div class="question">What is the objective for tomorrow?</div>
+  <div class="voice-wrap">
+    <textarea id="tomorrow" placeholder="Speak or type tomorrow's objective..." rows="2"></textarea>
+    <button class="mic-btn" onclick="startVoice('tomorrow', this)" title="Speak your answer"><svg width="13" height="18" style="flex-shrink:0"><use href="#mic-icon"/></svg> SPEAK</button>
+  </div>
+  <div class="voice-status" id="vs-tomorrow">● LISTENING...</div>
+  <div class="question" style="margin-top:16px;">What went well today?</div>
+  <div class="voice-wrap">
+    <textarea id="went-well" placeholder="One thing. Genuine. Short." rows="2"></textarea>
+    <button class="mic-btn" onclick="startVoice('went-well', this)" title="Speak your answer"><svg width="13" height="18" style="flex-shrink:0"><use href="#mic-icon"/></svg> SPEAK</button>
+  </div>
+  <div class="voice-status" id="vs-went-well">● LISTENING...</div>
+</div>
 <div class="btn-row">
   <button class="btn-secondary" onclick="prevStep(3)">← BACK</button>
   <button class="btn-primary" onclick="nextStep(3)">COMPLETE DEBRIEF →</button>
@@ -817,6 +836,14 @@ letter-spacing: 1px;
   <div id="sum-actions"></div>
 </div>
 
+<div class="summary-block" id="sum-tomorrow-block" style="display:none;">
+  <div class="summary-label" style="color:#e85520;">TOMORROW'S OBJECTIVE</div>
+  <div class="summary-text" id="sum-tomorrow"></div>
+</div>
+<div class="summary-block" id="sum-wentwell-block" style="display:none;">
+  <div class="summary-label" style="color:#e85520;">WHAT WENT WELL</div>
+  <div class="summary-text" id="sum-wentwell"></div>
+</div>
 <div id="streak-display" style="margin:24px 0 16px;text-align:center;"></div>
 
 <button class="copy-btn" onclick="copyDebrief()">COPY DEBRIEF TO CLIPBOARD</button>
@@ -1112,6 +1139,16 @@ function getTimerString() {
           </div>`;
       }
     }
+    const tomorrowVal = document.getElementById('tomorrow').value;
+    if (tomorrowVal) {
+      document.getElementById('sum-tomorrow').textContent = tomorrowVal;
+      document.getElementById('sum-tomorrow-block').style.display = 'block';
+    }
+    const wentWellVal = document.getElementById('went-well').value;
+    if (wentWellVal) {
+      document.getElementById('sum-wentwell').textContent = wentWellVal;
+      document.getElementById('sum-wentwell-block').style.display = 'block';
+    }
     renderStreak();
   }
 
@@ -1128,6 +1165,10 @@ function getTimerString() {
       const wn = document.getElementById(`a${i}-when`)?.value;
       if (w || wh || wn) text += `${i}. WHO: ${w} | WHAT: ${wh} | BY: ${wn}\n`;
     }
+    const tomorrowCopy = document.getElementById('tomorrow').value;
+    if (tomorrowCopy) text += `\nTOMORROW'S OBJECTIVE\n${tomorrowCopy}\n`;
+    const wentWellCopy = document.getElementById('went-well').value;
+    if (wentWellCopy) text += `\nWHAT WENT WELL\n${wentWellCopy}\n`;
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.querySelector('.copy-btn');
       btn.textContent = 'COPIED ✓';
