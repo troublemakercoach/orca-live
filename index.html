@@ -1073,8 +1073,12 @@ function getTimerString() {
     try { return JSON.parse(localStorage.getItem(STREAK_KEY) || '[]'); } catch(e) { return []; }
   }
 
+  function localDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   function todayStr() {
-    return new Date().toISOString().split('T')[0];
+    return localDateStr(new Date());
   }
 
   function markToday() {
@@ -1093,7 +1097,7 @@ function getTimerString() {
     const today = new Date(todayStr() + 'T00:00:00');
     const all = [];
     for (let d = new Date(first); d <= today; d.setDate(d.getDate() + 1)) {
-      all.push(d.toISOString().split('T')[0]);
+      all.push(localDateStr(d));
     }
     const show = all.slice(-30);
     let streak = 0;
