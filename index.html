@@ -169,6 +169,16 @@ border-left: 2px solid #2a2a2a;
 padding-left: 12px;
 }
 
+.step-frame {
+font-family: ‘IBM Plex Sans’, sans-serif;
+font-size: 13px;
+color: #e85520;
+font-style: italic;
+margin-top: 6px;
+margin-bottom: 2px;
+line-height: 1.5;
+}
+
 .question {
 background: #1a1a1a;
 border-left: 3px solid #CC4A1A;
@@ -591,6 +601,12 @@ letter-spacing: 1px;
   <div class="step-tab" id="tab-4" onclick="goToStep(4)">✓</div>
 </div>
 
+<div id="timer-bar" style="display:none;background:#0d0d0d;border-bottom:1px solid #1a1a1a;padding:10px 24px;align-items:center;justify-content:space-between;">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#555;letter-spacing:2px;">DEBRIEF TIMER</div>
+  <div id="timer-display" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#CC4A1A;letter-spacing:3px;line-height:1;">0:00</div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#555;letter-spacing:1px;">LIMIT: 14:24</div>
+</div>
+
 <div class="main">
 
   <div class="no-mic-note" id="noMicNote">
@@ -603,6 +619,7 @@ letter-spacing: 1px;
     <div class="step-header">
       <span class="step-letter">O</span>
       <span class="step-name">Objective</span>
+      <div class="step-frame">Step one — lock in exactly what you set out to do today.</div>
       <div class="step-rule">What did we set out to do?<br>One clear, measurable target for the session or day.</div>
     </div>
     <div class="question">What was the objective today?</div>
@@ -622,6 +639,7 @@ letter-spacing: 1px;
     <div class="step-header">
       <span class="step-letter">R</span>
       <span class="step-name">Result</span>
+      <div class="step-frame">Now we measure the gap — what you planned versus what actually happened.</div>
       <div class="step-rule">What actually happened? Identify the gap.<br>One result to debrief — success or failure.</div>
     </div>
     <div class="question">What actually happened?</div>
@@ -653,12 +671,14 @@ letter-spacing: 1px;
     <div class="step-header">
       <span class="step-letter">C</span>
       <span class="step-name">Cause</span>
+      <div class="step-frame">This is where most debriefs never go — ask WHY until you find the real reason.</div>
       <div class="step-rule">Ask WHY until you land on the root cause.<br>One or two causes max. No blame — just what caused it.</div>
     </div>
     <div class="nameless-banner">⚠ NAMELESS &amp; RANKLESS — No blame. No finger pointing. Just causes.</div>
 
 ```
 <div class="question">Keep asking WHY until you hit the root.</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#888;padding:8px 12px;margin-bottom:12px;border-left:2px solid #2a2a2a;line-height:1.6;">Ask WHY at least twice before you accept a cause. Don't stop at the surface.</div>
 <div class="why-chain" id="whyChain">
   <div class="why-item">
     <div class="why-badge">WHY 1</div>
@@ -734,6 +754,7 @@ letter-spacing: 1px;
     <div class="step-header">
       <span class="step-letter">A</span>
       <span class="step-name">Action</span>
+      <div class="step-frame">Actions are the whole point — small, specific, who does what by when. This is what changes tomorrow.</div>
       <div class="step-rule">Each cause gets one action. Max three total.<br>WHO does WHAT by WHEN. Small 1% improvements only.</div>
     </div>
 
@@ -779,6 +800,7 @@ letter-spacing: 1px;
 
 <button class="add-why-btn" id="addActionBtn" onclick="addAction()" style="margin-top:8px;">+ ADD ACTION</button>
 <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#888;margin-top:8px;">MAX 3 ACTIONS</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#555;margin-top:6px;line-height:1.6;">One-off tasks need WHO and WHEN. Recurring standards just need the standard.</div>
 
 <div style="margin-top:28px;padding-top:20px;border-top:1px solid #2a2a2a;">
   <div class="question">What is the objective for tomorrow?</div>
@@ -808,7 +830,16 @@ letter-spacing: 1px;
     <div class="complete-banner">
       <h2>DEBRIEF COMPLETE</h2>
       <p id="finalTime">TIME: 00:00 · 1% OF YOUR DAY INVESTED</p>
+      <div id="banner-tomorrow" style="display:none;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.2);text-align:left;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:3px;opacity:0.75;">TOMORROW'S MISSION</div>
+        <div id="banner-tomorrow-text" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1.2;margin-top:4px;word-break:break-word;"></div>
+      </div>
     </div>
+
+<div id="win-callout" style="display:none;background:#1a1a1a;border-left:4px solid #e85520;padding:16px 18px;margin-bottom:16px;">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:#e85520;margin-bottom:6px;">WIN OF THE DAY</div>
+  <div id="win-callout-text" style="font-family:'IBM Plex Sans',sans-serif;font-size:15px;line-height:1.5;color:#F5F0E8;"></div>
+</div>
 
 ```
 <div class="summary-block">
@@ -858,13 +889,13 @@ letter-spacing: 1px;
   <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.75rem;color:#555;margin-top:8px;">Pick your time. One tap. Repeats daily.</div>
 </div>
 
-<a href="https://www.skool.com/scrum" target="_blank" style="display:block;width:100%;margin-top:12px;padding:16px;background:#CC4A1A;color:#F5F0E8;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">📣 Share to Construction Skool →</a>
+<a href="https://www.skool.com/scrum?c=3e1de94a1e2741799eb767f348a896f8&s=newest-cm&fl=" target="_blank" style="display:block;width:100%;margin-top:12px;padding:16px;background:#CC4A1A;color:#F5F0E8;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">📣 Share to Construction Skool →</a>
 
 <div style="margin-top:24px;padding:20px;border:1px solid #2a2a2a;background:#111;">
   <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:#888;margin-bottom:8px;">WANT TO DO THIS WITH YOUR WHOLE TEAM?</div>
   <div style="font-family:'IBM Plex Sans',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px;">Join Catalyst Academy</div>
   <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.85rem;color:#888;margin-bottom:16px;">Where operators learn to run ORCA, spot signals, and create change without authority.</div>
-  <a href="https://www.skool.com/scrum" target="_blank" style="display:block;padding:14px;background:#F5F0E8;color:#0a0a0a;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">JOIN CATALYST ACADEMY →</a>
+  <a href="https://www.skool.com/scrum/classroom" target="_blank" style="display:block;padding:14px;background:#F5F0E8;color:#0a0a0a;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;text-align:center;text-decoration:none;text-transform:uppercase;">JOIN CATALYST ACADEMY →</a>
 </div>
 
 <button class="reset-btn" onclick="resetAll()">START NEW DEBRIEF</button>
@@ -994,11 +1025,25 @@ letter-spacing: 1px;
 function toggleTimer() {
     if (!timerRunning) {
       timerRunning = true;
-      timerInterval = setInterval(() => { timerSeconds++; }, 1000);
+      const bar = document.getElementById('timer-bar');
+      if (bar) bar.style.display = 'flex';
+      timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+      }, 1000);
     } else {
       timerRunning = false;
       clearInterval(timerInterval);
     }
+  }
+
+  function updateTimerDisplay() {
+    const el = document.getElementById('timer-display');
+    if (!el) return;
+    const m = Math.floor(timerSeconds / 60);
+    const s = timerSeconds % 60;
+    el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+    el.style.color = timerSeconds > 864 ? '#ff3333' : '#CC4A1A';
   }
 
 function getTimerString() {
@@ -1147,11 +1192,15 @@ function getTimerString() {
     if (tomorrowVal) {
       document.getElementById('sum-tomorrow').textContent = tomorrowVal;
       document.getElementById('sum-tomorrow-block').style.display = 'block';
+      document.getElementById('banner-tomorrow-text').textContent = tomorrowVal;
+      document.getElementById('banner-tomorrow').style.display = 'block';
     }
     const wentWellVal = document.getElementById('went-well').value;
     if (wentWellVal) {
       document.getElementById('sum-wentwell').textContent = wentWellVal;
       document.getElementById('sum-wentwell-block').style.display = 'block';
+      document.getElementById('win-callout-text').textContent = wentWellVal;
+      document.getElementById('win-callout').style.display = 'block';
     }
     renderStreak();
   }
